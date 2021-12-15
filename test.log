@@ -1,0 +1,26 @@
+当前拥有以下账号:
+
+ID : 28384301
+Account Type : spot
+Account State : working
+Subtype : 
+
+ID : 28410312
+Account Type : otc
+Account State : working
+Subtype : 
+
+模型运行开始
+币种:btcusdt当前市价：56515.85。56400.18941 57000.39059 未能满足交易,继续运行
+币种:btcusdt当前市价：56515.84。56400.18941 57000.39059 未能满足交易,继续运行
+币种:btcusdt当前市价：56515.84。56400.18941 57000.39059 未能满足交易,继续运行
+Traceback (most recent call last):
+  File "run.py", line 78, in <module>
+    instance.loop_run()
+  File "run.py", line 39, in loop_run
+    [grid_buy_price,grid_sell_price,quantity,step,cur_market_price,right_size] = self.pre_data(coinType)
+  File "run.py", line 29, in pre_data
+    cur_market_price = binan.get_ticker_price(cointype.lower())  # 当前交易对市价
+  File "/root/spot-trend-grid/app/HuobiAPI.py", line 31, in get_ticker_price
+    time.sleep(2)
+KeyboardInterrupt

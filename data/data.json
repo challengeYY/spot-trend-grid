@@ -1,52 +1,25 @@
 {
     "coinList": [
-        "ETHUSDT",
-        "BTCUSDT",
-        "BNBUSDT"
+        "btcusdt"
     ],
-    "ETHUSDT": {
+    "btcusdt": {
         "runBet": {
-            "next_buy_price": 3800,
-            "grid_sell_price": 4000,
-            "step": 0,
+            "next_buy_price": 46915.28012,
+            "grid_sell_price": 48924.14124,
+            "step": 2,
             "recorded_price": [
+                49711.73,
+                49013.4
             ]
         },
         "config": {
-            "profit_ratio": 2.3,
-            "double_throw_ratio": 2.3,
+            "profit_ratio": 1.4,
+            "double_throw_ratio": 1.4,
             "quantity": [
-                0.003
-            ]
-        }
-    },
-    "BTCUSDT": {
-        "runBet": {
-            "next_buy_price": 49000.0,
-            "grid_sell_price": 50000.0,
-            "step": 0,
-            "recorded_price": []
-        },
-        "config": {
-            "profit_ratio": 1.7,
-            "double_throw_ratio": 1.7,
-            "quantity": [
-                0.001
-            ]
-        }
-    },
-    "BNBUSDT": {
-        "runBet": {
-            "next_buy_price": 450,
-            "grid_sell_price": 500,
-            "step": 0,
-            "recorded_price": []
-        },
-        "config": {
-            "profit_ratio": 2.0,
-            "double_throw_ratio": 2.0,
-            "quantity": [
-                0.05
+                0.0006,
+                0.0008,
+                0.001,
+                0.0015
             ]
         }
     }

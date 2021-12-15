@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*
 import requests, time, hmac, hashlib,json,os
-from app.authorization import dingding_token, recv_window,api_secret,api_key
+from datetime import datetime
+from app.authorization import dingding_token, recv_window,api_secret,api_key,spot_id
+from huobi.client.account import AccountClient
+from huobi.utils import *
+from huobi.client.trade import TradeClient
+from huobi.constant import *
+
+
+
 # from app.dingding import Message
 # linux
 data_path = os.getcwd()+"/data/data.json"
@@ -11,6 +19,79 @@ try:
 # python3
 except ImportError:
     from urllib.parse import urlencode
+
+class HuobiAPI(object):
+    FUTURE_URL = "https://api.huobi.pro"
+    def __init__(self, key, secret):
+        self.key = key 
+        self.secret = secret
+        self.client  = AccountClient(api_key = key, secret_key = secret)
+        self.trader  = TradeClient(api_key = key, secret_key = secret)
+    def get_ticker_price(self,market):
+        time.sleep(2)
+        path = "%s/market/detail/merged" % self.FUTURE_URL
+        params = {"symbol":market}
+        res =  self._get_no_sign(path,params)
+        return float(res['tick']['close'])
+
+    def _get_no_sign(self, path, params={}):
+        query = urlencode(params)
+        url = "%s?%s" % (path, query)
+        res = requests.get(url, timeout=180, verify=True).json()
+        if isinstance(res, dict):
+            if 'code' in res:
+                error_info = "报警：请求异常.错误原因{info}".format( info=str(res))
+                self.dingding_warn(error_info)
+        return res
+
+    def _get_sign(self,method,host, path, params={}):
+        g_params ={}
+        query = urlencode(params)
+        url = "%s?%s" % (path, query)
+        res = requests.get(url, timeout=180, verify=True).json()
+        if isinstance(res, dict):
+            if 'code' in res:
+                error_info = "报警：请求异常.错误原因{info}".format( info=str(res))
+                self.dingding_warn(error_info)
+        return res
+
+    def _sign(self, params={}):
+        data = params.copy()
+
+        data.update({"AccessKeyId": api_key})
+        ######
+        data.update({"SignatureMethod": "HmacSHA256"})
+        data.update({"SignatureVersion": "2"})
+
+        ts = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+        data.update({"Timestamp": ts})
+        h = urlencode(data)
+        b = bytearray()
+        b.extend(self.secret.encode())
+        signature = hmac.new(b, msg=h.encode('utf-8'), digestmod=hashlib.sha256).hexdigest()
+        data.update({"Signature": signature})
+        return data
+
+    def get_klines(self, market, interval, limit,startTime=None, endTime=None,rotate_count = 0):
+        path = "%s/market/history/kline" % self.FUTURE_URL
+        params = None
+        if startTime is None:
+            params = {"symbol": market, "period":interval, "size":limit}
+        res =  self._get_no_sign(path, params)
+        return res
+
+    def get_accounts(self):
+        arr = self.client.get_accounts()
+        LogInfo.output_list(arr)
+        return arr
+
+    def buy_market(self, market, quantity):
+        order_id = self.trader.create_order(symbol=market, account_id=spot_id, order_type=OrderType.BUY_MARKET, source=OrderSource.API, amount=quantity, price=None)
+        return order_id
+    def sell_market(self, market, quantity):
+        order_id = self.trader.create_order(symbol=market, account_id=spot_id, order_type=OrderType.SELL_MARKET, source=OrderSource.API, amount=quantity, price=None)
+        return order_id
+
 
 class BinanceAPI(object):
     BASE_URL = "https://www.binance.com/api/v1"

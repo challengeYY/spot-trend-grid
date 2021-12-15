@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from app.BinanceAPI import BinanceAPI
+from app.HuobiAPI import HuobiAPI
 from app.authorization import api_key,api_secret
 import os,json
-binan = BinanceAPI(api_key,api_secret)
+binan = HuobiAPI(api_key,api_secret)
 # linux
 data_path = os.getcwd()+"/data/data.json"
 # windows
@@ -95,12 +95,12 @@ class RunBetData:
         data_json[symbol]['runBet']['recorded_price'].append(value)
         self._modify_json_data(data_json)
 
-    def get_atr(self,symbol,interval='4h',kline_num=20):
-
+    def get_atr(self,symbol,interval='4hour',kline_num=20):
         data = binan.get_klines(symbol, interval, kline_num)
+        data = data['data']
         percent_total = 0
         for i in range(len(data)):
-            percent_total = abs(float(data[i][3]) - float(data[i][2])) / float(data[i][4]) + percent_total
+            percent_total = abs(float(data[i]['low']) - float(data[i]['high'])) / float(data[i]['close']) + percent_total
 
         return round(percent_total/kline_num * 100,1)
 
@@ -126,9 +126,7 @@ class RunBetData:
 
         data_json[symbol]["runBet"]["step"] = step
         self._modify_json_data(data_json)
-        print("修改后的补仓价格为:{double}。修改后的网格价格为:{grid}".format(double=data_json[symbol]["runBet"]["next_buy_price"],
-                                                           grid=data_json[symbol]["runBet"]["grid_sell_price"]))
-
+        print("修改后的补仓价格为:{double}。修改后的网格价格为:{grid}".format(double=data_json[symbol]["runBet"]["next_buy_price"],grid=data_json[symbol]["runBet"]["grid_sell_price"]))
 
 
 if __name__ == "__main__":

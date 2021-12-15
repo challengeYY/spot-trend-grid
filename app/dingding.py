@@ -2,11 +2,22 @@ import requests,json
 
 # windows
 from app.authorization import dingding_token, recv_window,api_secret,api_key
-from app.BinanceAPI import BinanceAPI
+from app.HuobiAPI import HuobiAPI
 # linux
 # from app.authorization import dingding_token
 
 class Message:
+    def show_accounts(self):
+        '''
+            展示所有账号
+        :return:
+        '''
+        try:
+            res = HuobiAPI(api_key,api_secret).get_accounts()
+        except BaseException as e:
+            error_info = "报警：账号列表获取失败"
+            self.dingding_warn(error_info)
+            return res
 
     def buy_market_msg(self, market, quantity):
         '''
@@ -16,18 +27,21 @@ class Message:
         :return:
         '''
         try:
-            res = BinanceAPI(api_key,api_secret).buy_market(market, quantity)
-            if 'orderId' in res:
-                buy_info = "报警：币种为：{cointype}。买单量为：{num}.买单价格为：{price}".format(cointype=market,num=quantity,price=float(res['fills'][0]['price']))
+            res = HuobiAPI(api_key,api_secret).buy_market(market, quantity)
+            if type(res)==int and res>10000*10000*10000:
+                buy_info = "报警：币种为：{cointype}。买单量为：{num}".format(cointype=market,num=quantity)
+                print(buy_info)
                 self.dingding_warn(buy_info)
                 return res
             else:
                 error_info = "报警：币种为：{cointype},买单失败.{info}".format(cointype=market, info=res)
                 self.dingding_warn(error_info)
         except BaseException as e:
+            print("-------buy报错信息------")
+            print(str(e)) # 报错内容输出到 nohup,out
             error_info = "报警：币种为：{cointype},买单失败.{info}".format(cointype=market,info=str(e))
             self.dingding_warn(error_info)
-            return res
+            return error_info
 
     def buy_limit_msg(self, market, quantity,price):
         '''
@@ -47,9 +61,11 @@ class Message:
                 error_info = "报警：币种为：{cointype},买单失败.{info}".format(cointype=market, info=res)
                 self.dingding_warn(error_info)
         except BaseException as e:
+            print("-------报错信息------")
+            print(BaseException) # 报错内容输出到 nohup,out
             error_info = "报警：币种为：{cointype},买单失败.{info}".format(cointype=market,info=str(e))
             self.dingding_warn(error_info)
-            return res
+            return error_info
 
     def sell_market_msg(self,market, quantity,profit_usdt=0):
         '''
@@ -60,9 +76,11 @@ class Message:
         :return:
         '''
         try:
-            res = BinanceAPI(api_key,api_secret).sell_market(market, quantity)
-            if 'orderId' in res:
+            print(4343)
+            res = HuobiAPI(api_key,api_secret).sell_market(market, quantity)
+            if type(res)==int and  res>10000*10000*10000:
                 buy_info = "报警：币种为：{cointype}。卖单量为：{num}。预计盈利{profit_num}U".format(cointype=market,num=quantity,profit_num=round(profit_usdt,2))
+                print(buy_info)
                 self.dingding_warn(buy_info)
                 return res
             else:
@@ -70,11 +88,11 @@ class Message:
                 self.dingding_warn(error_info)
 
         except BaseException as e:
-            print("-------报错信息------")
-            print(BaseException) # 报错内容输出到 nohup,out
+            print("-------sell报错信息------")
+            print(str(e)) # 报错内容输出到 nohup,out
             error_info = "报警：币种为：{cointype},卖单失败.{info}".format(cointype=market,info=str(e))
             self.dingding_warn(error_info+str(res))
-            return res
+            return error_info
 
 
 

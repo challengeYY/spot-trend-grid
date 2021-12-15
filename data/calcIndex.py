@@ -1,9 +1,9 @@
-from app.BinanceAPI import BinanceAPI
+from app.HuobiAPI import HuobiAPI
 from app.authorization import api_key,api_secret
 from data.runBetData import RunBetData
 import time,os,json
 runbet = RunBetData()
-binan = BinanceAPI(api_key,api_secret)
+binan = HuobiAPI(api_key,api_secret)
 
 class CalcIndex:
 
@@ -85,14 +85,15 @@ class CalcIndex:
         last_ma5 = 0
         next_ma5 = 0
         data = binan.get_klines(symbol, interval, 6)
+        data = data['data']
         for i in range(len(data)):
             if i==0:
-                last_ma5+=float(data[i][4])
+                next_ma5+=float(data[i]['close'])
             elif i==5:
-                next_ma5+=float(data[i][4])
+                last_ma5+=float(data[i]['close'])
             else:
-                last_ma5+=float(data[i][4])
-                next_ma5+=float(data[i][4])
+                last_ma5+=float(data[i]['close'])
+                next_ma5+=float(data[i]['close'])
 
         return [round(last_ma5/5,point), round(next_ma5/5,point)]
 
